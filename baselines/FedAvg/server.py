@@ -23,6 +23,7 @@ from training_utils import test
 #init parameters
 parser = argparse.ArgumentParser(description='Distributed Client')
 parser.add_argument('--dataset_type', type=str, default='CIFAR100',choices=["CIFAR10", "CIFAR100","FashionMNIST"])
+# # 下面三个注释表示每个数据集推荐的参数列表
 # CIFAR10 lr=0.01 epoch=400 decay_rate=0.993
 # FMNIST lr=0.002 epoch=150 decay_rate=1
 # CIFAR100 lr=0.01 epoch=400 decay_rate=0.996
@@ -40,11 +41,11 @@ args = parser.parse_args()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '3'
 # device = torch.device("cuda" if args.use_cuda and torch.cuda.is_available() else "cpu")
-device = torch.device("cpu")
+device = torch.device("cpu")    # 因为都放在GPU上处理每个worker的模型，显卡放不下，我们放在cpu上处理
 
 
 def main():
-    start_time = datetime.datetime.now().strftime("%m-%d_%H-%M")
+    start_time = datetime.datetime.now().strftime("%m-%d_%H-%M")    # 记录程序开始时间
     # init config
     for arg in vars(args):
         print(arg, ":", getattr(args, arg))
