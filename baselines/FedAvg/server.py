@@ -63,11 +63,11 @@ def main():
     common_config.weight_decay = args.weight_decay
 
     #read the worker_config.json to init the worker node
-    with open("worker_config.json") as json_file:
+    with open("worker_config.json") as json_file:       # 加载配置文件
         workers_config = json.load(json_file)
 
-    global_model = models.create_model_instance(common_config.dataset_type)
-    init_para = torch.nn.utils.parameters_to_vector(global_model.parameters())
+    global_model = models.create_model_instance(common_config.dataset_type)     # 创建初始化模型
+    init_para = torch.nn.utils.parameters_to_vector(global_model.parameters())  
     common_config.para_nums=init_para.nelement()
     model_size = init_para.nelement() * 4 / 1024 / 1024
     print("para num: {}".format(common_config.para_nums))
@@ -82,7 +82,7 @@ def main():
         custom["computation"] = worker_config["computation"]
         custom["dynamics"] = worker_config["dynamics"]
         worker_list.append(
-            Worker(config=ClientConfig(common_config=common_config,custom=custom),
+            Worker(config=ClientConfig(common_config=common_config,custom=custom),  # 创建配置参数
                     idx=worker_idx,
                     client_ip=worker_config['ip_address'],
                     user_name=worker_config['user_name'],
@@ -93,16 +93,17 @@ def main():
                     )
         )
 
-    # Create model instance
+    # 创建数据分布：IID和non-IID
     train_data_partition, test_data_partition = partition_data(common_config.dataset_type, common_config.data_pattern,worker_num)
     for worker_idx, worker in enumerate(worker_list):
         worker.config.para = init_para
         worker.config.custom["train_data_idxes"] = train_data_partition.use(worker_idx)
         worker.config.custom["test_data_idxes"] = test_data_partition.use(worker_idx)
 
-    # connect socket and send init config
-    communication_parallel(worker_list, action="init")
-
+    # 与每个worker建立socket连接，并初始化每个worker
+    communication_parallel(worker_list, action="init")      
+    
+    # 记录运行结果
     recoder: SummaryWriter = SummaryWriter()
 
 
