@@ -211,17 +211,16 @@ def get_time_and_traffic(worker_list,total_time,total_traffic):
 def get_quantizated_model(worker):
     received_para,train_time,traffic = get_data_socket(worker.socket)
     worker.model_update = received_para.to(device)
-    # train_time,traffic = get_data_socket(worker.socket)
     worker.config.train_time = train_time
     worker.config.traffic = traffic
 
-def partition_data(dataset_type, data_pattern, worker_num=30):      # 使用6个用户训练，需要添加一个IID
+def partition_data(dataset_type, data_pattern, worker_num=20):      # 默认使用IID数据分布，可以根据需求，自己划分数据分布类型
     train_dataset, test_dataset = datasets.load_datasets(dataset_type)
     if dataset_type=="CIFAR10" or dataset_type=="FashionMNIST":
         partition_sizes = np.ones((10, worker_num)) * (1 / worker_num)  
     else:
         partition_sizes = np.ones((100, worker_num)) * (1 / worker_num)  
-    train_data_partition = datasets.LabelwisePartitioner(train_dataset, partition_sizes=partition_sizes)
+    train_data_partition = datasets.LabelwisePartitioner(train_dataset, partition_sizes=partition_sizes)            # 产生对应分布的数据索引
     test_data_partition = datasets.LabelwisePartitioner(test_dataset, partition_sizes=partition_sizes)            # 这种方式与训练集数据保持一致
     
     return train_data_partition, test_data_partition
@@ -240,7 +239,6 @@ def aggregate_model(local_para, worker_list,aggregate_vertor):
         average_weight=1.0/len(worker_list)
         for worker in worker_list:
             mid_model = worker.model_update
-            # para_delta += worker.config.average_weight * mid_model
             para_delta += average_weight * mid_model
         para_delta += local_para
 
