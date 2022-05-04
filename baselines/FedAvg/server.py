@@ -171,16 +171,16 @@ def communication_parallel(worker_list, action, data=None):
         executor = concurrent.futures.ThreadPoolExecutor(max_workers=len(worker_list),)
         tasks = []
         for worker in worker_list:
-            if action == "init":
+            if action == "init":        # 初始化
                 tasks.append(loop.run_in_executor(executor, worker.send_init_config))
-            elif action == "get_para":
+            elif action == "get_para":  # 获得量化后的模型参数
                 tasks.append(loop.run_in_executor(executor, get_quantizated_model,worker))
-            elif action == "send_model":
+            elif action == "send_model":    
                 tasks.append(loop.run_in_executor(executor, worker.send_data, data))
             elif action == "send_para":
-                data=worker.config.compre_ratio
+                data=worker.config.compre_ratio     # 发送量化参数
                 tasks.append(loop.run_in_executor(executor, worker.send_data,data))
-            elif action == "get_res":
+            elif action == "get_res":               # 获得每一轮的结果
                 tasks.append(loop.run_in_executor(executor, get_acc_and_loss,worker))
             
         loop.run_until_complete(asyncio.wait(tasks))
@@ -201,9 +201,9 @@ def get_time_and_traffic(worker_list,total_time,total_traffic):
         traffic.append(worker.config.traffic)
         loss.append(worker.loss)
         acc.append(worker.acc)
-    total_time += max(time_list)
+    total_time += max(time_list)        # 因为存在同步屏障，所以记录最大时间
     total_traffic += sum(traffic)
-    wait_time = (max(time_list)*len(worker_list)*1.0-sum(time_list))*1.0/len(worker_list)
+    wait_time = (max(time_list)*len(worker_list)*1.0-sum(time_list))*1.0/len(worker_list)   # 平均等待时间
     avg_loss = sum(loss)/len(loss)
     avg_acc = sum(acc)/len(acc)
     return wait_time,avg_acc,avg_loss,total_time,total_traffic
