@@ -132,7 +132,7 @@ def main():
         # 接收测试结果
         communication_parallel(worker_list, "get_res")
 
-        
+        # 对每一轮的数据进行处理
         avg_wait_time,avg_acc,avg_loss,total_time,total_traffic = get_time_and_traffic(worker_list,
                                                     total_time,total_traffic)
         print("等待时间{}，通信开销{}，通信流量{}".format(avg_wait_time,total_time,total_traffic))
@@ -175,8 +175,6 @@ def communication_parallel(worker_list, action, data=None):
                 tasks.append(loop.run_in_executor(executor, worker.send_init_config))
             elif action == "get_para":
                 tasks.append(loop.run_in_executor(executor, get_quantizated_model,worker))
-            # elif action == "get_time":
-                # tasks.append(loop.run_in_executor(executor, get_time_and_traffic,worker))
             elif action == "send_model":
                 tasks.append(loop.run_in_executor(executor, worker.send_data, data))
             elif action == "send_para":
