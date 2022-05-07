@@ -108,7 +108,7 @@ def main():
 
 
     local_steps = int(np.ceil(50000 / worker_num / common_config.batch_size))
-    print("local steps: {}".format(local_steps))        # 本地迭代次数是-1，不再改变
+    print("local steps: {}".format(local_steps))        
     
     total_time = 0.0
     total_traffic = 0.0
@@ -236,7 +236,7 @@ def compute_quantization_para(worker_list):
 def aggregate_model(local_para, worker_list,aggregate_vertor):
     with torch.no_grad():
         para_delta = torch.zeros_like(local_para)
-        average_weight=1.0/len(worker_list)
+        average_weight=1.0/len(worker_list)         # 联邦平均
         for worker in worker_list:
             mid_model = worker.model_update
             para_delta += average_weight * mid_model
