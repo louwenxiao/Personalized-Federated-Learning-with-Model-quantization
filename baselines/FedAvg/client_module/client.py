@@ -32,7 +32,7 @@ parser.add_argument('--use_cuda', action="store_false", default=True)
 args = parser.parse_args()
 
 if args.visible_cuda == '-1':
-    os.environ['CUDA_VISIBLE_DEVICES'] = str(int(args.idx) % 4)
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(int(args.idx) % 4)     # 指定GPU位置
 else:
     os.environ['CUDA_VISIBLE_DEVICES'] = args.visible_cuda
 device = torch.device("cuda" if args.use_cuda and torch.cuda.is_available() else "cpu")
@@ -97,7 +97,7 @@ def main():
         
         
         # 接收量化参数
-        compre_ratio=get_data_socket(master_socket)
+        compre_ratio=get_data_socket(master_socket)         # FedAvg默认None
         print("Compression Ratio: ", compre_ratio,"bits")
 
         begin_time = time.time()                                    # 模型训练
